@@ -1,12 +1,10 @@
-import express from 'express' 
-import cors, {CorsOptions} from 'cors'
+import express from 'express'
+import cors, { CorsOptions } from 'cors'
 import morgan from 'morgan'
-
 import colors from 'colors'
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec, { swaggerUiOptions } from './config/swagger'
-
-import router  from './router'
+import router from './router'
 import db from './config/db'
 
 // Conectar a base de datos
@@ -14,10 +12,9 @@ export async function connectDB() {
     try {
         await db.authenticate()
         db.sync()
-        //console.log( colors.blue( 'Conexión exitosa a la BD'))
+        console.log(colors.blue('Conexión exitosa a la BD'))
     } catch (error) {
-        // console.log(error)
-        console.log( colors.red.bold( 'Hubo un error al conectar a la BD') )
+        console.log(colors.red.bold('Hubo un error al conectar a la BD'))
     }
 }
 connectDB()
@@ -27,8 +24,9 @@ const server = express()
 
 // Permitir conexiones CORS
 const corsOptions: CorsOptions = {
-    origin: function(origin, callback) {
-        if (origin === process.env.FRONTEND_URL) {
+    origin: function (origin, callback) {
+        // Permitir solicitudes sin 'origin' (por ejemplo, desde Postman) y desde el FRONTEND_URL configurado
+        if (!origin || origin === process.env.FRONTEND_URL) {
             callback(null, true)
         } else {
             callback(new Error('Error de CORS'))
@@ -37,11 +35,8 @@ const corsOptions: CorsOptions = {
 }
 
 server.use(cors(corsOptions))
-
 server.use(express.json())
-
 server.use(morgan('dev'))
-
 server.use('/api/products', router)
 
 // Docs
